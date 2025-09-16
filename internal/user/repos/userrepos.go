@@ -33,3 +33,7 @@ func (repo *UserReposImpl) SignupUser(user *model.User) error {
 	return repo.Database.Create(newUser).Error
 
 }
+
+func NewUserRepository(database *gorm.DB) UserRepos {
+    return &UserReposImpl{Database: database}
+}
