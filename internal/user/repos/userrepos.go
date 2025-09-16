@@ -2,7 +2,7 @@ package repos
 
 import (
 	"github.com/ahmadammarm/inventory-backend/internal/user/model"
-	"github.com/ahmadammarm/inventory-backend/pkg"
+	"github.com/ahmadammarm/inventory-backend/pkg/hashpassword"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -18,21 +18,15 @@ type UserReposImpl struct {
 
 func (repo *UserReposImpl) SignupUser(user *model.User) error {
 
-	hashPassword, err := pkg.HashPassword(user.Password)
-
+	hashPassword, err := hashpassword.HashPassword(user.Password)
 	if err != nil {
 		return err
 	}
 
-	newUser := model.User{
-		ID:       uuid.New(),
-		Name:     user.Name,
-		Email:    user.Email,
-		Password: hashPassword,
-	}
+	user.ID = uuid.New()
+	user.Password = hashPassword
 
-	return repo.Database.Create(newUser).Error
-
+	return repo.Database.Create(user).Error
 }
 
 func (repo *UserReposImpl) IsEmailExists(email string) (bool, error) {
@@ -40,9 +34,9 @@ func (repo *UserReposImpl) IsEmailExists(email string) (bool, error) {
 	err := repo.Database.Where("email = ?", email).First(&user).Error
 
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return false, nil
-		}
+        if err == gorm.ErrRecordNotFound {
+            return false, nil
+        }
 		return false, err
 	}
 
