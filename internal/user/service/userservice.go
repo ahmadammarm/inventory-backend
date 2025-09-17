@@ -5,10 +5,13 @@ import (
 
 	"github.com/ahmadammarm/inventory-backend/internal/user/model"
 	userRepo "github.com/ahmadammarm/inventory-backend/internal/user/repos"
+	"github.com/ahmadammarm/inventory-backend/pkg/generatejwt"
+	"github.com/ahmadammarm/inventory-backend/pkg/hashpassword"
 )
 
 type UserService interface {
 	SignupUser(user *model.User) error
+	SigninUser(userReq *model.User) (*model.User, string, error)
 }
 
 type UserServiceImpl struct {
@@ -31,6 +34,27 @@ func (service *UserServiceImpl) SignupUser(user *model.User) error {
 
 	return service.userRepo.SignupUser(user)
 
+}
+
+func (service *UserServiceImpl) SigninUser(userReq *model.User) (*model.User, string, error) {
+
+    user, err := service.userRepo.SigninUser(userReq.Email)
+	if err != nil {
+		return nil, "", errors.New("user not found")
+	}
+
+
+    if !hashpassword.IsPasswordMatch(userReq.Password, user.Password) {
+		return nil, "", errors.New("wrong password")
+	}
+
+
+    token, err := generatejwt.GenerateJWT(user.Email)
+	if err != nil {
+		return nil, "", errors.New("failed to create the token")
+	}
+
+	return user, token, nil
 }
 
 func NewUserService(userRepo userRepo.UserRepos) UserService {

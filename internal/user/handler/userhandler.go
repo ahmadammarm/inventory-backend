@@ -47,7 +47,7 @@ func (handler *UserHandler) SignupUser(context *fiber.Ctx) error {
 		})
 	}
 
-	userResponse:= dto.UserResponse{
+	userResponse := dto.UserResponse{
 		ID:    user.ID,
 		Name:  user.Name,
 		Email: user.Email,
@@ -61,7 +61,48 @@ func (handler *UserHandler) SignupUser(context *fiber.Ctx) error {
 	})
 }
 
+func (handler *UserHandler) SigninUser(context *fiber.Ctx) error {
+
+	userReq := new(model.User)
+
+	if err := context.BodyParser(userReq); err != nil {
+		return context.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
+			Message: "Invalid request body",
+			Success: false,
+			Code:    fiber.StatusBadRequest,
+			Errors:  err.Error(),
+		})
+	}
+
+
+	user, token, err := handler.userService.SigninUser(userReq)
+	if err != nil {
+		return context.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+			Message: "Invalid email or password",
+			Success: false,
+			Code:    fiber.StatusUnauthorized,
+			Errors:  err.Error(),
+		})
+	}
+    
+
+	userResponse := dto.UserResponse{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
+		Token: token,
+	}
+
+	return context.Status(fiber.StatusOK).JSON(response.SuccessResponse{
+		Message: "User signed in successfully",
+		Success: true,
+		Code:    fiber.StatusOK,
+		Data:    userResponse,
+	})
+}
+
 func (handler *UserHandler) UserRouters(router fiber.Router) {
+	router.Post("/user/signin", handler.SigninUser)
 	router.Post("/user/signup", handler.SignupUser)
 }
 

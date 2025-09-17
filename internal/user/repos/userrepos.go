@@ -9,11 +9,29 @@ import (
 
 type UserRepos interface {
 	SignupUser(user *model.User) error
+	SigninUser(email string) (*model.User, error)
 	IsEmailExists(email string) (bool, error)
 }
 
 type UserReposImpl struct {
 	Database *gorm.DB
+}
+
+
+
+func (repo *UserReposImpl) SigninUser(email string) (*model.User, error) {
+    
+	var user model.User
+
+	err := repo.Database.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func (repo *UserReposImpl) SignupUser(user *model.User) error {
@@ -29,14 +47,15 @@ func (repo *UserReposImpl) SignupUser(user *model.User) error {
 	return repo.Database.Create(user).Error
 }
 
+
 func (repo *UserReposImpl) IsEmailExists(email string) (bool, error) {
 	var user model.User
 	err := repo.Database.Where("email = ?", email).First(&user).Error
 
 	if err != nil {
-        if err == gorm.ErrRecordNotFound {
-            return false, nil
-        }
+		if err == gorm.ErrRecordNotFound {
+			return false, nil
+		}
 		return false, err
 	}
 
