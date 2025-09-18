@@ -74,7 +74,6 @@ func (handler *UserHandler) SigninUser(context *fiber.Ctx) error {
 		})
 	}
 
-
 	user, token, err := handler.userService.SigninUser(userReq)
 	if err != nil {
 		return context.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
@@ -84,9 +83,8 @@ func (handler *UserHandler) SigninUser(context *fiber.Ctx) error {
 			Errors:  err.Error(),
 		})
 	}
-    
 
-	userResponse := dto.UserResponse{
+	userResponse := dto.UserJWTResponse{
 		ID:    user.ID,
 		Name:  user.Name,
 		Email: user.Email,
