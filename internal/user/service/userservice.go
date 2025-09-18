@@ -20,12 +20,7 @@ type UserServiceImpl struct {
 
 func (service *UserServiceImpl) SignupUser(user *model.User) error {
 
-	if user.Email == "" || user.Password == "" {
-		return errors.New("email and password must not be empty")
-	}
-
 	exists, err := service.userRepo.IsEmailExists(user.Email)
-
 	if err != nil {
 		return err
 	}
@@ -35,35 +30,26 @@ func (service *UserServiceImpl) SignupUser(user *model.User) error {
 	}
 
 	return service.userRepo.SignupUser(user)
-
 }
 
 func (service *UserServiceImpl) SigninUser(userReq *model.User) (*model.User, string, error) {
 
-    if userReq.Email == "" || userReq.Password == "" {
-        return nil, "", errors.New("email and password are required")
-    }
-
-
 	user, err := service.userRepo.SigninUser(userReq.Email)
-
 	if err != nil {
 		return nil, "", err
 	}
-
 
 	if user == nil {
 		return nil, "", errors.New("user not found")
 	}
 
 
-	if !hashpassword.IsPasswordMatch(userReq.Password, user.Password) {
+    if !hashpassword.IsPasswordMatch(userReq.Password, user.Password) {
 		return nil, "", errors.New("wrong password")
 	}
-    
 
-	token, err := generatejwt.GenerateJWT(user.Email)
 
+    token, err := generatejwt.GenerateJWT(user.Email)
 	if err != nil {
 		return nil, "", errors.New("failed to create the token")
 	}
