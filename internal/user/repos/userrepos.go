@@ -20,7 +20,7 @@ type UserReposImpl struct {
 
 
 func (repo *UserReposImpl) SigninUser(email string) (*model.User, error) {
-    
+
 	var user model.User
 
 	err := repo.Database.Where("email = ?", email).First(&user).Error

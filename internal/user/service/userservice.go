@@ -25,9 +25,11 @@ func (service *UserServiceImpl) SignupUser(user *model.User) error {
 	}
 
 	exists, err := service.userRepo.IsEmailExists(user.Email)
+
 	if err != nil {
 		return err
 	}
+
 	if exists {
 		return errors.New("email already exists")
 	}
@@ -38,18 +40,30 @@ func (service *UserServiceImpl) SignupUser(user *model.User) error {
 
 func (service *UserServiceImpl) SigninUser(userReq *model.User) (*model.User, string, error) {
 
-    user, err := service.userRepo.SigninUser(userReq.Email)
+    if userReq.Email == "" || userReq.Password == "" {
+        return nil, "", errors.New("email and password are required")
+    }
+
+
+	user, err := service.userRepo.SigninUser(userReq.Email)
+
 	if err != nil {
+		return nil, "", err
+	}
+
+
+	if user == nil {
 		return nil, "", errors.New("user not found")
 	}
 
 
-    if !hashpassword.IsPasswordMatch(userReq.Password, user.Password) {
+	if !hashpassword.IsPasswordMatch(userReq.Password, user.Password) {
 		return nil, "", errors.New("wrong password")
 	}
+    
 
+	token, err := generatejwt.GenerateJWT(user.Email)
 
-    token, err := generatejwt.GenerateJWT(user.Email)
 	if err != nil {
 		return nil, "", errors.New("failed to create the token")
 	}
