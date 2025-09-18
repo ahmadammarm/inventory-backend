@@ -4,6 +4,7 @@ import (
 	"github.com/ahmadammarm/inventory-backend/internal/user/dto"
 	"github.com/ahmadammarm/inventory-backend/internal/user/model"
 	"github.com/ahmadammarm/inventory-backend/internal/user/service"
+	"github.com/ahmadammarm/inventory-backend/middlewares"
 	"github.com/ahmadammarm/inventory-backend/pkg/response"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -100,8 +101,8 @@ func (handler *UserHandler) SigninUser(context *fiber.Ctx) error {
 }
 
 func (handler *UserHandler) UserRouters(router fiber.Router) {
-	router.Post("/user/signin", handler.SigninUser)
-	router.Post("/user/signup", handler.SignupUser)
+	router.Post("/user/signin", middlewares.RateLimitMiddleware(), handler.SigninUser)
+	router.Post("/user/signup", middlewares.RateLimitMiddleware(), handler.SignupUser)
 }
 
 func NewUserHandler(userService service.UserService, val *validator.Validate) *UserHandler {
