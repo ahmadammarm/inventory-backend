@@ -17,6 +17,7 @@ type ProductCategory struct {
 type Product struct {
 	ID                uuid.UUID       `gorm:"type:uuid;primaryKey" json:"id"`
 	Name              string          `gorm:"type:varchar(100)" json:"name" validate:"required,min=3"`
+	ImageUrl          string          `gorm:"type:varchar(255)" json:"image_url" validate:"required"`
 	Price             float64         `json:"price" validate:"required,gte=0"`
 	ProductCategoryID uuid.UUID       `gorm:"type:uuid;not null" json:"product_category_id" validate:"required"`
 	ProductCategory   ProductCategory `gorm:"foreignKey:ProductCategoryID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"product_category"`
