@@ -11,6 +11,10 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+func init() {
+    config.SupabaseStorageConnect()
+}
+
 func main() {
     database, err := config.PostgresConnect()
 
